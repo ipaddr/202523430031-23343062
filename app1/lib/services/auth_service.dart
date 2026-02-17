@@ -14,13 +14,14 @@ class AuthService {
   final _firebaseService = FirebaseService();
 
   // Stream untuk user state changes
-  Stream<User?> get authStateChanges => _firebaseService.auth.authStateChanges();
+  Stream<User?> get authStateChanges =>
+      _firebaseService.auth.authStateChanges();
 
   // Current user
-  User? get currentUser => _firebaseService.currentUser;
+  User? get currentUser => _firebaseService.auth.currentUser;
 
   // Check if user logged in
-  bool get isLoggedIn => _firebaseService.isLoggedIn;
+  bool get isLoggedIn => _firebaseService.auth.currentUser != null;
 
   /// Sign Up dengan email dan password
   Future<AuthResult> signUp({
@@ -34,11 +35,11 @@ class AuthService {
         password: password,
       );
 
-      if (displayName != null && userCredential.user != null) {
+      if (userCredential != null && displayName != null) {
         await _firebaseService.updateUserProfile(displayName: displayName);
       }
 
-      return AuthResult.success(userCredential.user!);
+      return AuthResult.success(userCredential?.user);
     } catch (e) {
       return AuthResult.error(e.toString());
     }
@@ -55,7 +56,7 @@ class AuthService {
         password: password,
       );
 
-      return AuthResult.success(userCredential.user!);
+      return AuthResult.success(userCredential?.user);
     } catch (e) {
       return AuthResult.error(e.toString());
     }
@@ -107,24 +108,13 @@ class AuthResult {
   final User? user;
   final String? message;
 
-  AuthResult({
-    required this.isSuccess,
-    this.user,
-    this.message,
-  });
+  AuthResult({required this.isSuccess, this.user, this.message});
 
   factory AuthResult.success(User? user, [String? message]) {
-    return AuthResult(
-      isSuccess: true,
-      user: user,
-      message: message,
-    );
+    return AuthResult(isSuccess: true, user: user, message: message);
   }
 
   factory AuthResult.error(String error) {
-    return AuthResult(
-      isSuccess: false,
-      message: error,
-    );
+    return AuthResult(isSuccess: false, message: error);
   }
 }
