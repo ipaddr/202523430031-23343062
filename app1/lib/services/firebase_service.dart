@@ -91,6 +91,29 @@ class FirebaseService {
     }
   }
 
+  /// Send email verification link
+  Future<void> sendEmailVerification() async {
+    try {
+      await _auth.currentUser?.sendEmailVerification();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Check if email is verified
+  bool isEmailVerified() {
+    return _auth.currentUser?.emailVerified ?? false;
+  }
+
+  /// Reload user to get latest verification status
+  Future<void> reloadUser() async {
+    try {
+      await _auth.currentUser?.reload();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // ============ FIRESTORE METHODS ============
 
   /// Tambah dokumen
@@ -114,10 +137,10 @@ class FirebaseService {
     bool merge = false,
   }) async {
     try {
-      await _firestore.collection(collection).doc(docId).set(
-            data,
-            SetOptions(merge: merge),
-          );
+      await _firestore
+          .collection(collection)
+          .doc(docId)
+          .set(data, SetOptions(merge: merge));
     } catch (e) {
       rethrow;
     }
@@ -161,9 +184,7 @@ class FirebaseService {
   }
 
   /// Ambil semua dokumen dari collection
-  Future<QuerySnapshot> getCollection({
-    required String collection,
-  }) async {
+  Future<QuerySnapshot> getCollection({required String collection}) async {
     try {
       return await _firestore.collection(collection).get();
     } catch (e) {
@@ -202,9 +223,7 @@ class FirebaseService {
   }
 
   /// Real-time stream dari collection
-  Stream<QuerySnapshot> streamCollection({
-    required String collection,
-  }) {
+  Stream<QuerySnapshot> streamCollection({required String collection}) {
     return _firestore.collection(collection).snapshots();
   }
 
@@ -225,9 +244,7 @@ class FirebaseService {
   }) async {
     try {
       final ref = _storage.ref().child(path);
-      await ref.putFile(
-        File(filePath),
-      );
+      await ref.putFile(File(filePath));
       return await ref.getDownloadURL();
     } catch (e) {
       rethrow;
@@ -268,9 +285,7 @@ class FirebaseService {
   // ============ TRANSACTION ============
 
   /// Transaction untuk operasi multi-dokumen
-  Future<T> transaction<T>(
-    Future<T> Function(Transaction) updateFn,
-  ) async {
+  Future<T> transaction<T>(Future<T> Function(Transaction) updateFn) async {
     try {
       return await _firestore.runTransaction(updateFn);
     } catch (e) {
