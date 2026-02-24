@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../screens/login_screen.dart';
 import '../screens/registration_screen.dart';
+import '../screens/email_verification_screen.dart';
 import '../screens/home_screen.dart';
 
 /// AuthStateWrapper - Handles authentication state and routing
+///
+/// Screen Flow:
+/// - Login Screen (index 0) <-> Registration Screen (index 1) <-> Email Verification (index 2)
+/// - After successful login or email verification, navigate to Home Screen
 class AuthStateWrapper extends StatefulWidget {
   const AuthStateWrapper({super.key});
 
@@ -14,22 +19,46 @@ class AuthStateWrapper extends StatefulWidget {
 
 class _AuthStateWrapperState extends State<AuthStateWrapper> {
   final _authService = AuthService();
-  late int _currentScreenIndex; // 0: Login, 1: Registration
+
+  // Screen indices for navigation
+  static const int _screenLogin = 0;
+  static const int _screenRegistration = 1;
+  static const int _screenEmailVerification = 2;
+
+  late int _currentScreenIndex;
+  String? _newUserEmail; // Store email for verification screen
 
   @override
   void initState() {
     super.initState();
-    _currentScreenIndex = 0; // Default to login screen
+    _currentScreenIndex = _screenLogin; // Default to login screen
   }
 
   /// Navigate to login screen
   void _goToLogin() {
-    setState(() => _currentScreenIndex = 0);
+    if (mounted) {
+      setState(() {
+        _currentScreenIndex = _screenLogin;
+        _newUserEmail = null;
+      });
+    }
   }
 
   /// Navigate to registration screen
   void _goToRegistration() {
-    setState(() => _currentScreenIndex = 1);
+    if (mounted) {
+      setState(() => _currentScreenIndex = _screenRegistration);
+    }
+  }
+
+  /// Navigate to email verification screen
+  void _goToEmailVerification(String email) {
+    if (mounted) {
+      setState(() {
+        _currentScreenIndex = _screenEmailVerification;
+        _newUserEmail = email;
+      });
+    }
   }
 
   @override
@@ -49,19 +78,46 @@ class _AuthStateWrapperState extends State<AuthStateWrapper> {
           return HomeScreen(onLogout: _goToLogin);
         }
 
-        // User not authenticated - show login or registration screen
-        return _currentScreenIndex == 0
-            ? LoginScreen(
-                onLoginSuccess: () {
-                  // Navigation handled by auth stream
-                },
-                onSignUpTap: _goToRegistration,
-              )
-            : RegistrationScreen(
-                onSignUpSuccess: _goToLogin,
-                onLoginTap: _goToLogin,
-              );
+        // User not authenticated - show authentication screens
+        return _buildAuthScreen();
       },
     );
+  }
+
+  /// Build appropriate auth screen based on current index
+  Widget _buildAuthScreen() {
+    switch (_currentScreenIndex) {
+      case _screenLogin:
+        return LoginScreen(
+          onLoginSuccess: () {
+            // Navigation handled by auth stream
+          },
+          onSignUpTap: _goToRegistration,
+        );
+
+      case _screenRegistration:
+        return RegistrationScreen(
+          onSignUpSuccess: (email) {
+            // Navigate to email verification screen
+            _goToEmailVerification(email);
+          },
+          onLoginTap: _goToLogin,
+        );
+
+      case _screenEmailVerification:
+        return EmailVerificationScreen(
+          email: _newUserEmail,
+          onVerificationComplete: () {
+            // User verified - auth stream will handle navigation to home
+          },
+          onSkip: _goToLogin,
+        );
+
+      default:
+        return LoginScreen(
+          onLoginSuccess: () {},
+          onSignUpTap: _goToRegistration,
+        );
+    }
   }
 }

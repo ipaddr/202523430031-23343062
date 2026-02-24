@@ -4,7 +4,7 @@ import 'package:app1/widgets/custom_text_field.dart';
 
 /// Registration Screen - Sign Up Page
 class RegistrationScreen extends StatefulWidget {
-  final VoidCallback? onSignUpSuccess;
+  final Function(String)? onSignUpSuccess; // Pass email to callback
   final VoidCallback? onLoginTap;
 
   const RegistrationScreen({super.key, this.onSignUpSuccess, this.onLoginTap});
@@ -130,6 +130,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           ),
         );
 
+        // Store email before clearing
+        final String userEmail = _emailController.text.trim();
+
         // Clear form
         _nameController.clear();
         _emailController.clear();
@@ -137,10 +140,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         _confirmPasswordController.clear();
         setState(() => _agreeToTerms = false);
 
-        // Callback on success
+        // Callback on success - pass email for verification
         await Future.delayed(const Duration(seconds: 1));
         if (mounted) {
-          widget.onSignUpSuccess?.call();
+          widget.onSignUpSuccess?.call(userEmail);
         }
       } else {
         // Show error message
