@@ -100,6 +100,42 @@ class AuthService {
       return AuthResult.error(e.toString());
     }
   }
+
+  /// Send Email Verification
+  Future<AuthResult> sendEmailVerification() async {
+    try {
+      await _firebaseService.sendEmailVerification();
+      return AuthResult.success(
+        null,
+        'Link verifikasi email telah dikirim. Silakan cek email Anda.',
+      );
+    } catch (e) {
+      return AuthResult.error(e.toString());
+    }
+  }
+
+  /// Check Email Verification Status
+  Future<bool> isEmailVerified() async {
+    try {
+      await _firebaseService.reloadUser();
+      return _firebaseService.isEmailVerified();
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Resend Email Verification
+  Future<AuthResult> resendEmailVerification() async {
+    try {
+      await _firebaseService.sendEmailVerification();
+      return AuthResult.success(
+        null,
+        'Link verifikasi ulang telah dikirim ke email Anda.',
+      );
+    } catch (e) {
+      return AuthResult.error(e.toString());
+    }
+  }
 }
 
 /// Result class untuk auth operations
