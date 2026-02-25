@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'config/routes.dart';
+import 'config/app_router.dart';
+import 'config/navigation_service.dart';
 import 'widgets/app_initializer.dart';
 
 void main() async {
@@ -25,6 +28,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Firebase Auth App',
       debugShowCheckedModeBanner: false,
+      navigatorKey: NavigationService.navigatorKey,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -34,7 +38,8 @@ class MyApp extends StatelessWidget {
           elevation: 0,
         ),
       ),
-      home: const AppInitializer(),
+      onGenerateRoute: AppRouter.onGenerateRoute,
+      initialRoute: AppRoutes.appInit,
     );
   }
 }

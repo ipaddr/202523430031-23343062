@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:app1/services/auth_service.dart';
+import 'package:app1/config/routes.dart';
+import 'package:app1/config/navigation_service.dart';
 
 /// Logout Screen - Halaman untuk proses logout
 class LogoutScreen extends StatefulWidget {
@@ -24,7 +26,8 @@ class _LogoutScreenState extends State<LogoutScreen> {
 
       if (mounted) {
         widget.onLogoutSuccess?.call();
-        Navigator.pop(context);
+        // Navigate to login and clear all routes
+        NavigationService.goToLoginAndClear();
       }
     } catch (e) {
       if (mounted) {
@@ -87,7 +90,7 @@ class _LogoutScreenState extends State<LogoutScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => NavigationService.pop(),
               child: const Text('Batal'),
             ),
             ElevatedButton(
@@ -119,7 +122,7 @@ class _LogoutScreenState extends State<LogoutScreen> {
 
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pop(context);
+        NavigationService.pop();
         return false;
       },
       child: Scaffold(
@@ -129,7 +132,7 @@ class _LogoutScreenState extends State<LogoutScreen> {
           backgroundColor: Colors.deepPurple,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => NavigationService.pop(),
           ),
         ),
         body: SingleChildScrollView(
@@ -291,7 +294,7 @@ class _LogoutScreenState extends State<LogoutScreen> {
                     width: double.infinity,
                     height: 50,
                     child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => NavigationService.pop(),
                       style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
