@@ -125,10 +125,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final result = await _authService.signUp(
+      final result = await _authService.register(
         email: _emailController.text.trim(),
         password: _passwordController.text,
-        displayName: _nameController.text.trim(),
+        name: _nameController.text.trim(),
       );
 
       if (!mounted) return;
