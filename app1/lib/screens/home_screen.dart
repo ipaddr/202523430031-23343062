@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:app1/services/auth_service.dart';
+import 'logout_screen.dart';
 
 /// Home Screen - Halaman utama setelah login
 class HomeScreen extends StatefulWidget {
@@ -104,29 +105,12 @@ class _HomeScreenState extends State<HomeScreen> {
               width: 200,
               height: 48,
               child: ElevatedButton(
-                onPressed: () async {
-                  // Show confirmation dialog
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Logout'),
-                      content: const Text('Anda yakin ingin logout?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Batal'),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            Navigator.pop(context);
-                            await _authService.logout();
-                            if (mounted) {
-                              widget.onLogout?.call();
-                            }
-                          },
-                          child: const Text('Logout'),
-                        ),
-                      ],
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          LogoutScreen(onLogoutSuccess: widget.onLogout),
                     ),
                   );
                 },
