@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:app1/services/auth_service.dart';
 import 'package:app1/widgets/custom_text_field.dart';
+import 'package:app1/config/error_handler.dart';
+import 'package:app1/config/exceptions.dart';
+import 'package:app1/widgets/error_widgets.dart';
 
 /// Login Screen - Sign In Page
 class LoginScreen extends StatefulWidget {
@@ -22,6 +25,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _isLoading = false;
   bool _rememberMe = false;
+  String? _errorMessage;
+  bool _showError = false;
+  int _failedAttempts = 0;
+  static const int _maxFailedAttempts = 5;
 
   @override
   void initState() {
@@ -61,6 +68,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
   /// Handle Login
   Future<void> _handleLogin() async {
+    // Check if already locked out
+    if (_failedAttempts >= _maxFailedAttempts) {
+      _showErrorMessage(
+        'Terlalu banyak percobaan login gagal. Coba lagi dalam beberapa menit.',
+        showLocked: true,
+      );
+      return;
+    }
+
+    // Clear previous error
+    _clearError();
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -76,13 +95,19 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       if (result.isSuccess) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Selamat datang ${result.user?.email}'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        // Reset failed attempts on success
+        _failedAttempts = 0;
+
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Selamat datang ${result.user?.email}'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
 
         _emailController.clear();
         _passwordController.clear();
@@ -92,22 +117,58 @@ class _LoginScreenState extends State<LoginScreen> {
           widget.onLoginSuccess?.call();
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${result.message}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // Handle auth error
+        _failedAttempts++;
+        final message = result.message ?? 'Login gagal. Silakan coba lagi.';
+        _showErrorMessage(message);
       }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+    } on AppException catch (e) {
+      // Handle custom exceptions
+      _failedAttempts++;
+      _showErrorMessage(
+        ErrorHandler.getErrorMessageWithSuggestion(e),
+        showLocked: _failedAttempts >= _maxFailedAttempts,
       );
+    } catch (e) {
+      // Handle unexpected errors
+      _failedAttempts++;
+      final appException = ErrorHandler.handleException(e);
+      _showErrorMessage(
+        ErrorHandler.getErrorMessageWithSuggestion(appException),
+        showLocked: _failedAttempts >= _maxFailedAttempts,
+      );
+      debugPrint('Login error: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  /// Show error message
+  void _showErrorMessage(String message, {bool showLocked = false}) {
+    if (mounted) {
+      setState(() {
+        _errorMessage = message;
+        _showError = true;
+      });
+
+      // Auto dismiss error after 6 seconds
+      Future.delayed(const Duration(seconds: 6), () {
+        if (mounted && _showError) {
+          _clearError();
+        }
+      });
+    }
+  }
+
+  /// Clear error message
+  void _clearError() {
+    if (mounted) {
+      setState(() {
+        _errorMessage = null;
+        _showError = false;
+      });
     }
   }
 
@@ -136,6 +197,42 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  // Error Banner (if error exists)
+                  if (_showError && _errorMessage != null)
+                    ErrorBanner(
+                      message: _errorMessage!,
+                      onClose: _clearError,
+                      isDismissible: true,
+                      icon: Icons.warning_outlined,
+                    ),
+                  if (_showError && _errorMessage != null)
+                    const SizedBox(height: 16),
+
+                  // Locked Out Warning (if max attempts reached)
+                  if (_failedAttempts >= _maxFailedAttempts)
+                    WarningBanner(
+                      message:
+                          'Terlalu banyak percobaan gagal. Akun sementara terkunci.',
+                      isDismissible: false,
+                    ),
+                  if (_failedAttempts >= _maxFailedAttempts)
+                    const SizedBox(height: 16),
+
+                  // Failed attempts counter
+                  if (_failedAttempts > 0 &&
+                      _failedAttempts < _maxFailedAttempts)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(
+                        'Percobaan gagal: $_failedAttempts/$_maxFailedAttempts',
+                        style: TextStyle(
+                          color: Colors.yellow[700],
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+
                   // Logo/App Icon
                   Container(
                     decoration: BoxDecoration(
@@ -264,7 +361,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             width: double.infinity,
                             height: 54,
                             child: ElevatedButton(
-                              onPressed: _isLoading ? null : _handleLogin,
+                              onPressed:
+                                  (_isLoading ||
+                                      _failedAttempts >= _maxFailedAttempts)
+                                  ? null
+                                  : _handleLogin,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.deepPurple,
                                 disabledBackgroundColor: Colors.grey[400],
@@ -285,9 +386,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                             ),
                                       ),
                                     )
-                                  : const Text(
-                                      'Login',
-                                      style: TextStyle(
+                                  : Text(
+                                      _failedAttempts >= _maxFailedAttempts
+                                          ? 'Akun Terkunci'
+                                          : 'Login',
+                                      style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w700,
                                         color: Colors.white,

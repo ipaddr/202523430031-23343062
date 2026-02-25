@@ -4,7 +4,6 @@ import 'firebase_options.dart';
 import 'config/routes.dart';
 import 'config/app_router.dart';
 import 'config/navigation_service.dart';
-import 'widgets/app_initializer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
