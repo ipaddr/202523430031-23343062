@@ -22,7 +22,6 @@ class EmailVerificationScreen extends StatefulWidget {
 class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   final _authService = AuthService();
   bool _isLoading = false;
-  bool _isVerified = false;
   int _resendTimer = 0;
   late String _userEmail;
 
@@ -57,10 +56,6 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       try {
         final isVerified = await _authService.isEmailVerified();
         if (isVerified && mounted) {
-          setState(() {
-            _isVerified = true;
-          });
-
           // Show success message and navigate
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(

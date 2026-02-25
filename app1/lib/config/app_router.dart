@@ -34,10 +34,10 @@ class AppRouter {
       // Login Screen
       case AppRoutes.login:
         return MaterialPageRoute(
-          builder: (_) => LoginScreen(
-            onLoginSuccess: args is Function ? args : null,
+          builder: (context) => LoginScreen(
+            onLoginSuccess: args as VoidCallback?,
             onSignUpTap: () {
-              Navigator.pushReplacementNamed(_, AppRoutes.registration);
+              Navigator.pushReplacementNamed(context, AppRoutes.registration);
             },
           ),
         );
@@ -45,16 +45,16 @@ class AppRouter {
       // Registration Screen
       case AppRoutes.registration:
         return MaterialPageRoute(
-          builder: (_) => RegistrationScreen(
+          builder: (context) => RegistrationScreen(
             onSignUpSuccess: (email) {
               Navigator.pushNamed(
-                _,
+                context,
                 AppRoutes.emailVerification,
                 arguments: email,
               );
             },
             onLoginTap: () {
-              Navigator.pushReplacementNamed(_, AppRoutes.login);
+              Navigator.pushReplacementNamed(context, AppRoutes.login);
             },
           ),
         );
@@ -63,13 +63,13 @@ class AppRouter {
       case AppRoutes.emailVerification:
         final email = args as String?;
         return MaterialPageRoute(
-          builder: (_) => EmailVerificationScreen(
+          builder: (context) => EmailVerificationScreen(
             email: email,
             onVerificationComplete: () {
-              Navigator.pushReplacementNamed(_, AppRoutes.home);
+              Navigator.pushReplacementNamed(context, AppRoutes.home);
             },
             onSkip: () {
-              Navigator.pushReplacementNamed(_, AppRoutes.login);
+              Navigator.pushReplacementNamed(context, AppRoutes.login);
             },
           ),
         );
@@ -77,7 +77,7 @@ class AppRouter {
       // Home Screen
       case AppRoutes.home:
         return MaterialPageRoute(
-          builder: (_) => HomeScreen(onLogout: args is Function ? args : null),
+          builder: (context) => HomeScreen(onLogout: args as VoidCallback?),
         );
 
       // Notes Screen
@@ -87,8 +87,8 @@ class AppRouter {
       // Logout Screen
       case AppRoutes.logout:
         return MaterialPageRoute(
-          builder: (_) =>
-              LogoutScreen(onLogoutSuccess: args is Function ? args : null),
+          builder: (context) =>
+              LogoutScreen(onLogoutSuccess: args as VoidCallback?),
         );
 
       // Error Screen (404)
