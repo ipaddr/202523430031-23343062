@@ -1,14 +1,17 @@
 # Migrating to Auth Service - Migration Guide
 
 ## Overview
+
 This document outlines the migration from the previous Firebase authentication implementation to the new comprehensive **AuthService** with improved error handling, validation, and Firestore integration.
 
 ## What Changed
 
-### 1. **Core Authentication Service** 
+### 1. **Core Authentication Service**
+
 **File:** `lib/services/auth_service.dart`
 
 #### New Methods
+
 - `register()` - Unified registration with validation & Firestore integration
 - `login()` - Enhanced login with proper error handling
 - `reloadUserAndCheckEmailVerification()` - Better email verification check
@@ -18,16 +21,19 @@ This document outlines the migration from the previous Firebase authentication i
 - `checkEmailExists()` - Pre-registration email check
 
 #### Improved Methods
+
 - `sendEmailVerification()` - Enhanced with checked verification status
 - `resendEmailVerification()` - Simplified with better messaging
 - `updateUserProfile()` - Unified update method for display name & photo
 - `changePassword()` - New method for password changes
 
 #### Deprecated Methods (Still Available)
+
 - `signUp()` - Use `register()` instead
 - Maintains backward compatibility for legacy code
 
 ### 2. **User Model**
+
 **File:** `lib/models/user_model.dart` (NEW)
 
 ```dart
@@ -43,24 +49,30 @@ class UserModel {
 ```
 
 **Key Methods:**
+
 - `fromFirestore()` - Convert Firestore document to UserModel
 - `toJson()` - Convert to JSON for Firestore
 - `copyWith()` - Create modified copies
 - Equality & hashing support
 
 ### 3. **Error Handling Integration**
+
 The new AuthService uses the existing error handling system in `lib/config/`:
+
 - `exceptions.dart` - Custom exception hierarchy
 - `error_handler.dart` - Firebase error mapping
 
 **Exception Types:**
+
 - `AppException` - Base exception
 - `AuthException` - Authentication errors
 - `ValidationException` - Input validation errors
 - `NetworkException` - Network-related errors
 
 ### 4. **Validation**
+
 All inputs are now validated in the service:
+
 - **Email**: Format validation with regex
 - **Password**: Minimum 6 characters
 - **Name**: 3-50 characters
@@ -68,17 +80,20 @@ All inputs are now validated in the service:
 ## Migration Checklist
 
 ### ✅ Already Migrated
+
 - [x] LoginScreen - Uses `authService.login()`
 - [x] EmailVerificationScreen - Uses verification methods
 - [x] IdentityConfirmationScreen - Uses `authService.currentUser`
 - [x] LogoutScreen - Uses `authService.logout()`
 
 ### ✅ Updated in This Migration
+
 - [x] RegistrationScreen - Changed from `signUp()` to `register()`
 
 ### Screens Using New AuthService
 
 #### 1. **LoginScreen** (`lib/screens/login_screen.dart`)
+
 ```dart
 final result = await _authService.login(
   email: email,
@@ -87,6 +102,7 @@ final result = await _authService.login(
 ```
 
 #### 2. **RegistrationScreen** (`lib/screens/registration_screen.dart`)
+
 ```dart
 final result = await _authService.register(
   email: email,
@@ -96,12 +112,14 @@ final result = await _authService.register(
 ```
 
 #### 3. **EmailVerificationScreen** (`lib/screens/email_verification_screen.dart`)
+
 ```dart
 await _authService.sendEmailVerification();
 final isVerified = await _authService.isEmailVerified();
 ```
 
 #### 4. **IdentityConfirmationScreen** (`lib/screens/identity_confirmation_screen.dart`)
+
 ```dart
 final result = await _authService.login(
   email: user?.email ?? '',
@@ -110,6 +128,7 @@ final result = await _authService.login(
 ```
 
 #### 5. **AuthStateWrapper** (`lib/widgets/auth_state_wrapper.dart`)
+
 ```dart
 Stream<User?> authStateChanges = _authService.authStateChanges;
 ```
@@ -117,22 +136,27 @@ Stream<User?> authStateChanges = _authService.authStateChanges;
 ## Key Improvements
 
 ### 1. **Input Validation**
+
 - All inputs validated before Firebase calls
 - Clear error messages for validation failures
 - Prevents unnecessary Firebase API calls
 
 ### 2. **Firestore Integration**
+
 - User data automatically saved on registration
 - User model fetched with `getUserData(uid)`
 - Real-time user data via stream: `currentUserData`
 
 ### 3. **Better Error Messages**
+
 - Custom exceptions with codes and messages
 - Mapped to user-friendly indonesian messages
 - Consistent error handling across all methods
 
 ### 4. **User Data Persistence**
+
 When a user registers:
+
 ```json
 {
   "uid": "user123",
@@ -146,7 +170,9 @@ When a user registers:
 ```
 
 ### 5. **Email Verification Check**
+
 Before showing HomeScreen (in AuthStateWrapper):
+
 ```dart
 // Automatically checks if email is verified
 bool isVerified = await authService.isEmailVerified();
@@ -155,6 +181,7 @@ bool isVerified = await authService.isEmailVerified();
 ## Backward Compatibility
 
 The service maintains backward compatibility:
+
 - `signUp()` method still available (marked @Deprecated)
 - Existing code continues to work
 - Gradually update to new methods
@@ -162,6 +189,7 @@ The service maintains backward compatibility:
 ## Usage Examples
 
 ### Registration with Error Handling
+
 ```dart
 final result = await _authService.register(
   email: 'user@example.com',
@@ -179,6 +207,7 @@ if (result.isSuccess) {
 ```
 
 ### Getting User Data
+
 ```dart
 // One-time fetch
 final userData = await _authService.getCurrentUserData();
@@ -190,6 +219,7 @@ _authService.currentUserData.listen((user) {
 ```
 
 ### Password Change
+
 ```dart
 try {
   await _authService.changePassword('newPassword123');
@@ -224,6 +254,7 @@ try {
 ## Migration Complete ✅
 
 All screens have been updated to use the new comprehensive AuthService. The system now has:
+
 - ✅ Unified authentication service
 - ✅ Firestore user persistence
 - ✅ Comprehensive error handling
