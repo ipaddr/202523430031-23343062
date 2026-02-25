@@ -9,6 +9,7 @@ class AppRoutes {
   static const String login = '/login';
   static const String registration = '/registration';
   static const String emailVerification = '/email-verification';
+  static const String identityConfirmation = '/identity-confirmation';
 
   // Main App Routes
   static const String home = '/home';
@@ -26,6 +27,7 @@ class AppRoutes {
       login,
       registration,
       emailVerification,
+      identityConfirmation,
       home,
       notes,
       logout,

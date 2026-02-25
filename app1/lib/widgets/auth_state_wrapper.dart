@@ -3,13 +3,15 @@ import '../services/auth_service.dart';
 import '../screens/login_screen.dart';
 import '../screens/registration_screen.dart';
 import '../screens/email_verification_screen.dart';
+import '../screens/identity_confirmation_screen.dart';
 import '../screens/home_screen.dart';
 
 /// AuthStateWrapper - Handles authentication state and routing
 ///
 /// Screen Flow:
 /// - Login Screen (index 0) <-> Registration Screen (index 1) <-> Email Verification (index 2)
-/// - After successful login or email verification, navigate to Home Screen
+/// - Identity Confirmation Screen (index 3)
+/// - After successful identity confirmation, navigate to Home Screen
 class AuthStateWrapper extends StatefulWidget {
   const AuthStateWrapper({super.key});
 
@@ -24,9 +26,11 @@ class _AuthStateWrapperState extends State<AuthStateWrapper> {
   static const int _screenLogin = 0;
   static const int _screenRegistration = 1;
   static const int _screenEmailVerification = 2;
+  static const int _screenIdentityConfirmation = 3;
 
   late int _currentScreenIndex;
   String? _newUserEmail; // Store email for verification screen
+  bool _identityConfirmed = false; // Track if identity has been confirmed
 
   @override
   void initState() {
@@ -61,6 +65,15 @@ class _AuthStateWrapperState extends State<AuthStateWrapper> {
     }
   }
 
+  /// Navigate to identity confirmation screen
+  void _goToIdentityConfirmation() {
+    if (mounted) {
+      setState(() {
+        _currentScreenIndex = _screenIdentityConfirmation;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -73,8 +86,23 @@ class _AuthStateWrapperState extends State<AuthStateWrapper> {
           );
         }
 
-        // User is authenticated - show home screen
+        // User is authenticated
         if (snapshot.hasData && snapshot.data != null) {
+          // If identity is not yet confirmed, show identity confirmation screen
+          if (!_identityConfirmed) {
+            return IdentityConfirmationScreen(
+              onConfirmed: () {
+                if (mounted) {
+                  setState(() {
+                    _identityConfirmed = true;
+                  });
+                }
+              },
+              onLogout: _goToLogin,
+            );
+          }
+
+          // Identity confirmed - show home screen
           return HomeScreen(onLogout: _goToLogin);
         }
 
@@ -108,9 +136,22 @@ class _AuthStateWrapperState extends State<AuthStateWrapper> {
         return EmailVerificationScreen(
           email: _newUserEmail,
           onVerificationComplete: () {
-            // User verified - auth stream will handle navigation to home
+            // Navigate to identity confirmation screen
+            _goToIdentityConfirmation();
           },
           onSkip: _goToLogin,
+        );
+
+      case _screenIdentityConfirmation:
+        return IdentityConfirmationScreen(
+          onConfirmed: () {
+            if (mounted) {
+              setState(() {
+                _identityConfirmed = true;
+              });
+            }
+          },
+          onLogout: _goToLogin,
         );
 
       default:
