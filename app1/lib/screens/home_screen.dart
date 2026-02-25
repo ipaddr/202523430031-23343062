@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:app1/services/auth_service.dart';
-import 'logout_screen.dart';
-import 'notes_screen.dart';
+import 'package:app1/config/routes.dart';
+import 'package:app1/config/navigation_service.dart';
 
 /// Home Screen - Halaman utama setelah login
 class HomeScreen extends StatefulWidget {
@@ -119,12 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.transparent,
                         child: InkWell(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const NotesScreen(),
-                              ),
-                            );
+                            NavigationService.pushNamed(AppRoutes.notes);
                           },
                           child: Icon(
                             Icons.note,
@@ -148,12 +143,9 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 48,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          LogoutScreen(onLogoutSuccess: widget.onLogout),
-                    ),
+                  NavigationService.pushNamed(
+                    AppRoutes.logout,
+                    arguments: widget.onLogout,
                   );
                 },
                 style: ElevatedButton.styleFrom(
