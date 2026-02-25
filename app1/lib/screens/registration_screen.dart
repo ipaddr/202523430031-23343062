@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:app1/services/auth_service.dart';
 import 'package:app1/widgets/custom_text_field.dart';
+import 'package:app1/config/error_handler.dart';
+import 'package:app1/config/exceptions.dart';
+import 'package:app1/widgets/error_widgets.dart';
+import 'registration_success_screen.dart';
 
 /// Registration Screen - Sign Up Page
 class RegistrationScreen extends StatefulWidget {
@@ -25,6 +29,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   bool _isLoading = false;
   bool _agreeToTerms = false;
+  String? _errorMessage;
+  bool _showError = false;
+  int _failedAttempts = 0;
+  static const int _maxFailedAttempts = 5;
 
   @override
   void initState() {
@@ -93,17 +101,24 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   /// Handle Sign Up
   Future<void> _handleSignUp() async {
+    // Check if already locked out
+    if (_failedAttempts >= _maxFailedAttempts) {
+      _showErrorMessage(
+        'Terlalu banyak percobaan pendaftaran gagal. Coba lagi dalam beberapa menit.',
+        showLocked: true,
+      );
+      return;
+    }
+
+    // Clear previous error
+    _clearError();
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
     if (!_agreeToTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Anda harus setuju dengan syarat dan ketentuan'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showErrorMessage('Anda harus setuju dengan syarat dan ketentuan');
       return;
     }
 
@@ -119,19 +134,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       if (!mounted) return;
 
       if (result.isSuccess) {
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Registrasi berhasil! Selamat datang ${_nameController.text}',
-            ),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        // Reset failed attempts on success
+        _failedAttempts = 0;
 
         // Store email before clearing
         final String userEmail = _emailController.text.trim();
+        final String userName = _nameController.text.trim();
 
         // Clear form
         _nameController.clear();
@@ -140,29 +148,87 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         _confirmPasswordController.clear();
         setState(() => _agreeToTerms = false);
 
-        // Callback on success - pass email for verification
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Registrasi berhasil! Selamat datang $userName'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+
+        // Navigate to success screen then verification
         await Future.delayed(const Duration(seconds: 1));
         if (mounted) {
-          widget.onSignUpSuccess?.call(userEmail);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RegistrationSuccessScreen(
+                email: userEmail,
+                name: userName,
+                onContinue: () {
+                  widget.onSignUpSuccess?.call(userEmail);
+                },
+              ),
+            ),
+          );
         }
       } else {
-        // Show error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${result.message}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // Handle auth error
+        _failedAttempts++;
+        final message =
+            result.message ?? 'Registrasi gagal. Silakan coba lagi.';
+        _showErrorMessage(message);
       }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+    } on AppException catch (e) {
+      // Handle custom exceptions
+      _failedAttempts++;
+      _showErrorMessage(
+        ErrorHandler.getErrorMessageWithSuggestion(e),
+        showLocked: _failedAttempts >= _maxFailedAttempts,
       );
+    } catch (e) {
+      // Handle unexpected errors
+      _failedAttempts++;
+      final appException = ErrorHandler.handleException(e);
+      _showErrorMessage(
+        ErrorHandler.getErrorMessageWithSuggestion(appException),
+        showLocked: _failedAttempts >= _maxFailedAttempts,
+      );
+      debugPrint('Registration error: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  /// Show error message
+  void _showErrorMessage(String message, {bool showLocked = false}) {
+    if (mounted) {
+      setState(() {
+        _errorMessage = message;
+        _showError = true;
+      });
+
+      // Auto dismiss error after 6 seconds
+      Future.delayed(const Duration(seconds: 6), () {
+        if (mounted && _showError) {
+          _clearError();
+        }
+      });
+    }
+  }
+
+  /// Clear error message
+  void _clearError() {
+    if (mounted) {
+      setState(() {
+        _errorMessage = null;
+        _showError = false;
+      });
     }
   }
 
@@ -176,6 +242,41 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Error Banner (if error exists)
+              if (_showError && _errorMessage != null)
+                ErrorBanner(
+                  message: _errorMessage!,
+                  onClose: _clearError,
+                  isDismissible: true,
+                  icon: Icons.warning_outlined,
+                ),
+              if (_showError && _errorMessage != null)
+                const SizedBox(height: 16),
+
+              // Locked Out Warning (if max attempts reached)
+              if (_failedAttempts >= _maxFailedAttempts)
+                WarningBanner(
+                  message:
+                      'Terlalu banyak percobaan gagal. Akun sementara terkunci.',
+                  isDismissible: false,
+                ),
+              if (_failedAttempts >= _maxFailedAttempts)
+                const SizedBox(height: 16),
+
+              // Failed attempts counter
+              if (_failedAttempts > 0 && _failedAttempts < _maxFailedAttempts)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Text(
+                    'Percobaan gagal: $_failedAttempts/$_maxFailedAttempts',
+                    style: TextStyle(
+                      color: Colors.yellow[700],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+
               // Header
               const SizedBox(height: 20),
               const Text(
@@ -275,7 +376,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
-                        onPressed: _isLoading ? null : _handleSignUp,
+                        onPressed:
+                            (_isLoading ||
+                                _failedAttempts >= _maxFailedAttempts)
+                            ? null
+                            : _handleSignUp,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.deepPurple,
                           disabledBackgroundColor: Colors.grey[400],
@@ -295,9 +400,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                   ),
                                 ),
                               )
-                            : const Text(
-                                'Daftar',
-                                style: TextStyle(
+                            : Text(
+                                _failedAttempts >= _maxFailedAttempts
+                                    ? 'Akun Terkunci'
+                                    : 'Daftar',
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.white,
