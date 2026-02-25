@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:app1/services/auth_service.dart';
 import 'logout_screen.dart';
+import 'notes_screen.dart';
 
 /// Home Screen - Halaman utama setelah login
 class HomeScreen extends StatefulWidget {
@@ -97,6 +98,47 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
+            ),
+            const SizedBox(height: 40),
+
+            // Feature Buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Notes Button
+                Column(
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.blue[100],
+                        shape: BoxShape.circle,
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const NotesScreen(),
+                              ),
+                            );
+                          },
+                          child: Icon(
+                            Icons.note,
+                            size: 32,
+                            color: Colors.blue[700],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text('Catatan', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ],
             ),
             const SizedBox(height: 40),
 
