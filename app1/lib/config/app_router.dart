@@ -3,6 +3,7 @@ import '../screens/splash_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/registration_screen.dart';
 import '../screens/email_verification_screen.dart';
+import '../screens/identity_confirmation_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/notes_screen.dart';
 import '../screens/logout_screen.dart';
@@ -66,9 +67,25 @@ class AppRouter {
           builder: (context) => EmailVerificationScreen(
             email: email,
             onVerificationComplete: () {
-              Navigator.pushReplacementNamed(context, AppRoutes.home);
+              Navigator.pushReplacementNamed(
+                context,
+                AppRoutes.identityConfirmation,
+              );
             },
             onSkip: () {
+              Navigator.pushReplacementNamed(context, AppRoutes.login);
+            },
+          ),
+        );
+
+      // Identity Confirmation Screen
+      case AppRoutes.identityConfirmation:
+        return MaterialPageRoute(
+          builder: (context) => IdentityConfirmationScreen(
+            onConfirmed: () {
+              Navigator.pushReplacementNamed(context, AppRoutes.home);
+            },
+            onLogout: () {
               Navigator.pushReplacementNamed(context, AppRoutes.login);
             },
           ),
