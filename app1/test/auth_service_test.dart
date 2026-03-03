@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mockito/mockito.dart';
-import 'package:app1/services/auth_service.dart';
 import 'package:app1/config/exceptions.dart';
 
 // Mock classes
@@ -33,11 +32,13 @@ class MockUserCredential extends Mock implements UserCredential {
 
 class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
 
-class MockCollectionReference extends Fake implements CollectionReference {}
+// Note: CollectionReference, DocumentReference, and DocumentSnapshot are sealed classes
+// and cannot be extended. Using Mock directly instead.
+class MockCollectionReference extends Mock {}
 
-class MockDocumentReference extends Fake implements DocumentReference {}
+class MockDocumentReference extends Mock {}
 
-class MockDocumentSnapshot extends Fake implements DocumentSnapshot {
+class MockDocumentSnapshot extends Mock {
   final Map<String, dynamic> _data;
 
   MockDocumentSnapshot(this._data);
