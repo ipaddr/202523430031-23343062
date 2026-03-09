@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/note_model.dart';
 import '../services/notes_stream_service.dart';
+import '../services/firestore_notes_service.dart';
 
 class EditNoteScreen extends StatefulWidget {
   final NoteModel note;
@@ -15,6 +16,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   late TextEditingController _titleController;
   late TextEditingController _contentController;
   final _notesService = NotesStreamService();
+  final _firestoreService = FirestoreNotesService();
   String _selectedCategory = '';
   bool _isLoading = false;
 
@@ -64,9 +66,19 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
         updatedAt: DateTime.now(),
       );
 
-      bool success = await _notesService.updateNote(updatedNote);
+      // Update local storage
+      bool localSuccess = await _notesService.updateNote(updatedNote);
 
-      if (success) {
+      if (!localSuccess) {
+        throw Exception('Failed to update note locally');
+      }
+
+      // Update Firestore
+      bool firestoreSuccess = await _firestoreService.updateNoteInFirestore(
+        updatedNote,
+      );
+
+      if (firestoreSuccess) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -85,10 +97,16 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Gagal memperbarui note'),
-              backgroundColor: Colors.red,
+              content: Text('Note diperbarui lokal, gagal update di cloud'),
+              backgroundColor: Colors.orange,
             ),
           );
+
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              Navigator.pop(context);
+            }
+          });
         }
       }
     } catch (e) {

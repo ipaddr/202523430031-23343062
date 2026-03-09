@@ -99,6 +99,7 @@ class NotesStreamService {
         (n) => n.id == noteId,
         orElse: () => NoteModel(
           id: noteId,
+          userId: _getCurrentUserId() ?? '',
           title: 'Note not found',
           content: '',
           createdAt: DateTime.now(),
