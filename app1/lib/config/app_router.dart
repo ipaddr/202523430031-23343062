@@ -6,6 +6,7 @@ import '../screens/email_verification_screen.dart';
 import '../screens/identity_confirmation_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/notes_screen.dart';
+import '../screens/notes_display_screen.dart';
 import '../screens/create_note_screen.dart';
 import '../screens/logout_screen.dart';
 import '../widgets/app_initializer.dart';
@@ -100,7 +101,11 @@ class AppRouter {
 
       // Notes Screen
       case AppRoutes.notes:
-        return MaterialPageRoute(builder: (_) => const NotesScreen());
+        return MaterialPageRoute(builder: (_) => const NotesDisplayScreen());
+
+      // Notes Display Screen
+      case AppRoutes.notesDisplay:
+        return MaterialPageRoute(builder: (_) => const NotesDisplayScreen());
 
       // Create Note Screen
       case AppRoutes.createNote:
