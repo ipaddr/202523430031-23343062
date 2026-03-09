@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 /// Model untuk Notes
 class NoteModel {
   final String id;
+  final String userId;
   final String title;
   final String content;
   final String? category;
@@ -14,6 +15,7 @@ class NoteModel {
 
   NoteModel({
     required this.id,
+    required this.userId,
     required this.title,
     required this.content,
     this.category,
@@ -28,6 +30,7 @@ class NoteModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'userId': userId,
       'title': title,
       'content': content,
       'category': category,
@@ -43,6 +46,7 @@ class NoteModel {
   factory NoteModel.fromJson(Map<String, dynamic> json) {
     return NoteModel(
       id: json['id'] ?? '',
+      userId: json['userId'] ?? '',
       title: json['title'] ?? '',
       content: json['content'] ?? '',
       category: json['category'],
@@ -63,6 +67,7 @@ class NoteModel {
   /// Copy with untuk update data tertentu
   NoteModel copyWith({
     String? id,
+    String? userId,
     String? title,
     String? content,
     String? category,
@@ -74,6 +79,7 @@ class NoteModel {
   }) {
     return NoteModel(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       title: title ?? this.title,
       content: content ?? this.content,
       category: category ?? this.category,
