@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:app1/models/models.dart';
 import 'package:app1/services/auth_service.dart';
+import 'package:app1/config/routes.dart';
 
 /// Notes Screen - Halaman untuk mengelola catatan
 class NotesScreen extends StatefulWidget {
@@ -393,7 +394,9 @@ class _NotesScreenState extends State<NotesScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showNoteDialog(),
+        onPressed: () {
+          Navigator.pushNamed(context, AppRoutes.createNote);
+        },
         backgroundColor: Colors.deepPurple,
         child: const Icon(Icons.add),
       ),

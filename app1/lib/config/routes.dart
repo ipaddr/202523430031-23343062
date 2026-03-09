@@ -14,6 +14,7 @@ class AppRoutes {
   // Main App Routes
   static const String home = '/home';
   static const String notes = '/notes';
+  static const String createNote = '/create-note';
   static const String logout = '/logout';
 
   // Utility Routes
@@ -30,6 +31,7 @@ class AppRoutes {
       identityConfirmation,
       home,
       notes,
+      createNote,
       logout,
       error,
     ];
