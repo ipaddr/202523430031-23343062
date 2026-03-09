@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/note_model.dart';
 import '../services/notes_stream_service.dart';
 import '../config/routes.dart';
+import 'edit_note_screen.dart';
 
 class NotesDisplayScreen extends StatefulWidget {
   const NotesDisplayScreen({super.key});
@@ -215,6 +216,15 @@ class _NoteCard extends StatefulWidget {
 class _NoteCardState extends State<_NoteCard> {
   bool _isDeleting = false;
 
+  Future<void> _showEditDialog() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditNoteScreen(note: widget.note),
+      ),
+    );
+  }
+
   Future<void> _showDeleteConfirmation() async {
     showDialog(
       context: context,
@@ -317,7 +327,7 @@ class _NoteCardState extends State<_NoteCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title and Delete Button
+            // Title and Action Buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -334,13 +344,28 @@ class _NoteCardState extends State<_NoteCard> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
-                  onPressed: _showDeleteConfirmation,
-                  iconSize: 20,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
+                const SizedBox(width: 4),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.edit_outlined,
+                        color: Colors.deepPurple,
+                      ),
+                      onPressed: _showEditDialog,
+                      iconSize: 20,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.red),
+                      onPressed: _showDeleteConfirmation,
+                      iconSize: 20,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
                 ),
               ],
             ),
