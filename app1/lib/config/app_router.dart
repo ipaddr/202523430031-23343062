@@ -8,6 +8,7 @@ import '../screens/home_screen.dart';
 import '../screens/notes_screen.dart';
 import '../screens/notes_display_screen.dart';
 import '../screens/create_note_screen.dart';
+import '../screens/edit_note_screen.dart';
 import '../screens/logout_screen.dart';
 import '../widgets/app_initializer.dart';
 import 'routes.dart';
@@ -110,6 +111,16 @@ class AppRouter {
       // Create Note Screen
       case AppRoutes.createNote:
         return MaterialPageRoute(builder: (_) => const CreateNoteScreen());
+
+      // Edit Note Screen
+      case AppRoutes.editNote:
+        final noteModel = args as dynamic;
+        if (noteModel != null && noteModel is dynamic) {
+          return MaterialPageRoute(
+            builder: (_) => EditNoteScreen(note: noteModel),
+          );
+        }
+        return MaterialPageRoute(builder: (_) => const NotesDisplayScreen());
 
       // Logout Screen
       case AppRoutes.logout:
