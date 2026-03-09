@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/note_model.dart';
 import '../services/notes_stream_service.dart';
+import '../services/firestore_notes_service.dart';
+import '../services/auth_service.dart';
 import 'package:uuid/uuid.dart';
 
 class CreateNoteScreen extends StatefulWidget {
@@ -14,6 +16,8 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   final _notesService = NotesStreamService();
+  final _firestoreService = FirestoreNotesService();
+  final _authService = AuthService();
   bool _isLoading = false;
 
   @override
@@ -39,16 +43,42 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
     });
 
     try {
-      bool success = await _notesService.createNote(
+      // Get current user ID
+      final userId = _authService.uid;
+      if (userId == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // Create note object
+      const uuid = Uuid();
+      final newNote = NoteModel(
+        id: uuid.v4(),
+        userId: userId,
+        title: _titleController.text,
+        content: _contentController.text,
+        createdAt: DateTime.now(),
+      );
+
+      // Save to local storage
+      bool localSuccess = await _notesService.createNote(
         _titleController.text,
         _contentController.text,
       );
 
-      if (success) {
+      if (!localSuccess) {
+        throw Exception('Failed to save note locally');
+      }
+
+      // Save to Firestore
+      bool firestoreSuccess = await _firestoreService.createNoteToFirestore(
+        newNote,
+      );
+
+      if (firestoreSuccess) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Note berhasil dibuat!'),
+              content: Text('Note berhasil disimpan!'),
               backgroundColor: Colors.green,
             ),
           );
@@ -66,10 +96,19 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Gagal membuat note'),
-              backgroundColor: Colors.red,
+              content: Text('Catatan disimpan lokal, gagal upload ke cloud'),
+              backgroundColor: Colors.orange,
             ),
           );
+
+          _titleController.clear();
+          _contentController.clear();
+
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              Navigator.pop(context);
+            }
+          });
         }
       }
     } catch (e) {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/note_model.dart';
 import '../services/notes_stream_service.dart';
+import '../services/firestore_notes_service.dart';
+import '../services/auth_service.dart';
 import '../config/routes.dart';
 import 'edit_note_screen.dart';
 
@@ -215,6 +217,8 @@ class _NoteCard extends StatefulWidget {
 
 class _NoteCardState extends State<_NoteCard> {
   bool _isDeleting = false;
+  final _firestoreService = FirestoreNotesService();
+  final _authService = AuthService();
 
   Future<void> _showEditDialog() async {
     Navigator.push(
@@ -266,15 +270,29 @@ class _NoteCardState extends State<_NoteCard> {
     });
 
     try {
-      bool success = await widget.notesService.deleteNote(widget.note.id);
+      bool localSuccess = await widget.notesService.deleteNote(widget.note.id);
+      bool firestoreSuccess = await _firestoreService.deleteNoteInFirestore(
+        widget.note.id,
+      );
 
-      if (success) {
+      if (localSuccess && firestoreSuccess) {
         if (mounted) {
           Navigator.pop(context); // Close dialog
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Catatan berhasil dihapus'),
               backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } else if (localSuccess) {
+        if (mounted) {
+          Navigator.pop(context); // Close dialog
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Catatan dihapus (offline)'),
+              backgroundColor: Colors.orange,
               duration: Duration(seconds: 2),
             ),
           );

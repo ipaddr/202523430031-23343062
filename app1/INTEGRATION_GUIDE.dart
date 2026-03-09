@@ -358,6 +358,7 @@ class AppPreferences {
     return _storage.getString('app_language', defaultValue: 'en');
   }
 }
+*/
 
 // ============ STEP 10: Troubleshooting ============
 /*
