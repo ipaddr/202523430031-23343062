@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import '../models/note_model.dart';
 import '../services/notes_stream_service.dart';
 import '../services/firestore_notes_service.dart';
+import '../blocs/loading_bloc.dart';
+import '../blocs/dialog_bloc.dart';
+import '../blocs/navigation_bloc.dart';
+import '../widgets/loading_widgets.dart';
 
 class EditNoteScreen extends StatefulWidget {
   final NoteModel note;
@@ -18,7 +22,6 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   final _notesService = NotesStreamService();
   final _firestoreService = FirestoreNotesService();
   String _selectedCategory = '';
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -44,21 +47,20 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   }
 
   Future<void> _updateNote() async {
+    // Validation
     if (_titleController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Title tidak boleh kosong!'),
-          backgroundColor: Colors.red,
-        ),
+      DialogBloc.showErrorDialog(
+        context,
+        title: 'Validasi Gagal',
+        message: 'Judul tidak boleh kosong!',
       );
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
-
     try {
+      // Show loading overlay
+      LoadingBloc.start(context, message: 'Menyimpan perubahan...');
+
       final updatedNote = widget.note.copyWith(
         title: _titleController.text,
         content: _contentController.text,
@@ -70,7 +72,15 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
       bool localSuccess = await _notesService.updateNote(updatedNote);
 
       if (!localSuccess) {
-        throw Exception('Failed to update note locally');
+        LoadingBloc.stop(context);
+        if (mounted) {
+          DialogBloc.showErrorDialog(
+            context,
+            title: 'Error',
+            message: 'Gagal menyimpan perubahan secara lokal',
+          );
+        }
+        return;
       }
 
       // Update Firestore
@@ -78,48 +88,46 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
         updatedNote,
       );
 
+      LoadingBloc.stop(context);
+
       if (firestoreSuccess) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Note berhasil diperbarui!'),
-              backgroundColor: Colors.green,
-            ),
+          DialogBloc.showSuccessDialog(
+            context,
+            title: 'Berhasil',
+            message: 'Catatan berhasil diperbarui!',
           );
 
           Future.delayed(const Duration(seconds: 1), () {
             if (mounted) {
-              Navigator.pop(context);
+              NavigationBloc.pop(context);
             }
           });
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Note diperbarui lokal, gagal update di cloud'),
-              backgroundColor: Colors.orange,
-            ),
+          DialogBloc.showErrorDialog(
+            context,
+            title: 'Peringatan',
+            message: 'Catatan diperbarui lokal, namun gagal update di cloud',
           );
 
           Future.delayed(const Duration(seconds: 2), () {
             if (mounted) {
-              Navigator.pop(context);
+              NavigationBloc.pop(context);
             }
           });
         }
       }
     } catch (e) {
+      LoadingBloc.stop(context);
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        DialogBloc.showErrorDialog(
+          context,
+          title: 'Error',
+          message: 'Error: $e',
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
       }
     }
   }
@@ -215,36 +223,11 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
             ),
             const SizedBox(height: 32),
 
-            // Save Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _updateNote,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  backgroundColor: Colors.deepPurple,
-                  disabledBackgroundColor: Colors.grey,
-                ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Text(
-                        'Simpan Perubahan',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-              ),
+            // Save Button (Using LoadingButton)
+            LoadingButton(
+              label: 'Simpan Perubahan',
+              isLoading: false,
+              onPressed: _updateNote,
             ),
             const SizedBox(height: 12),
 
@@ -252,7 +235,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: _isLoading ? null : () => Navigator.pop(context),
+                onPressed: () => NavigationBloc.pop(context),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   side: const BorderSide(color: Colors.deepPurple),

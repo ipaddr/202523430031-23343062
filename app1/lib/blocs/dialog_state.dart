@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'dialog_event.dart';
 
 /// Dialog states
 abstract class DialogState extends Equatable {
