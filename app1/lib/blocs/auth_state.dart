@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import '../models/note_model.dart';
 
 /// Abstract class untuk Auth states
 abstract class AuthState extends Equatable {
@@ -56,6 +55,15 @@ class AuthError extends AuthState {
 
   @override
   List<Object?> get props => [message, errorCode];
+
+  /// Getter untuk check apakah error dapat di-retry
+  bool get isRetryable =>
+      errorCode == 'network-request-failed' ||
+      errorCode == 'too-many-requests' ||
+      errorCode == 'service-unavailable';
+
+  /// Getter untuk check apakah error adalah network error
+  bool get isNetworkError => errorCode == 'network-request-failed';
 }
 
 /// State untuk profile update success

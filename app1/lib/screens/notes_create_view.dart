@@ -27,14 +27,12 @@ class _NotesCreateViewState extends State<NotesCreateView> {
   bool _isSaving = false;
 
   // Auto-save timer
-  late DateTime _lastEditTime;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController();
     _contentController = TextEditingController();
-    _lastEditTime = DateTime.now();
     _initializeService();
     _setupAutoSave();
   }

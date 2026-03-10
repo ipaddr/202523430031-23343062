@@ -1,5 +1,3 @@
-import 'package:uuid/uuid.dart';
-
 /// Model untuk Notes
 class NoteModel {
   final String id;
