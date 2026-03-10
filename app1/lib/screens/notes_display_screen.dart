@@ -4,6 +4,7 @@ import '../services/notes_stream_service.dart';
 import '../services/firestore_notes_service.dart';
 import '../config/routes.dart';
 import 'edit_note_screen.dart';
+import '../widgets/loading_widgets.dart';
 
 class NotesDisplayScreen extends StatefulWidget {
   const NotesDisplayScreen({super.key});
@@ -66,10 +67,11 @@ class _NotesDisplayScreenState extends State<NotesDisplayScreen> {
             child: StreamBuilder<List<NoteModel>>(
               stream: _notesService.getAllNotesStream(),
               builder: (context, snapshot) {
-                // Loading State
+                // Loading State - Show Skeleton List
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: Colors.deepPurple),
+                  return const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: SkeletonList(itemCount: 5),
                   );
                 }
 

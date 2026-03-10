@@ -76,4 +76,55 @@ class DialogBloc extends Bloc<DialogEvent, DialogState> {
   ) async {
     emit(const DialogCancelled());
   }
+
+  /// Helper method untuk show confirmation dialog
+  static void showConfirmationDialog(
+    context, {
+    required String title,
+    required String message,
+    String confirmLabel = 'Ya',
+    String cancelLabel = 'Batal',
+  }) {
+    context.read<DialogBloc>().add(
+      ShowConfirmationDialog(
+        title: title,
+        message: message,
+        confirmLabel: confirmLabel,
+        cancelLabel: cancelLabel,
+      ),
+    );
+  }
+
+  /// Helper method untuk show success dialog
+  static void showSuccessDialog(
+    context, {
+    required String title,
+    required String message,
+  }) {
+    context.read<DialogBloc>().add(
+      ShowSuccessDialog(title: title, message: message),
+    );
+  }
+
+  /// Helper method untuk show error dialog
+  static void showErrorDialog(
+    context, {
+    required String title,
+    required String message,
+  }) {
+    context.read<DialogBloc>().add(
+      ShowErrorDialog(title: title, message: message),
+    );
+  }
+
+  /// Helper method untuk show info dialog
+  static void showInfoDialog(
+    context, {
+    required String title,
+    required String message,
+  }) {
+    context.read<DialogBloc>().add(
+      ShowInfoDialog(title: title, message: message),
+    );
+  }
 }

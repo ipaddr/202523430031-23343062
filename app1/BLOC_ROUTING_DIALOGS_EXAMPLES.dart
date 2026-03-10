@@ -3,18 +3,15 @@
 ///
 /// Contoh cara set up dan integrate NavigationBloc dan DialogBloc ke dalam app
 
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-// Import BLoCs
+// Import BLoCs (uncomment when implementing)
 // import 'lib/blocs/navigation_bloc.dart';
 // import 'lib/blocs/dialog_bloc.dart';
 
-// Import Listeners
+// Import Listeners (uncomment when implementing)
 // import 'lib/widgets/navigation_listener.dart';
 // import 'lib/widgets/dialog_listener.dart';
 
-// Import Router
+// Import Router (uncomment when implementing)
 // import 'lib/config/app_router.dart';
 
 /*
