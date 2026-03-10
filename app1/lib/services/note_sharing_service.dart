@@ -1,4 +1,3 @@
-import '../models/note_model.dart';
 import 'auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -322,7 +321,7 @@ class NoteSharingService {
         return null;
       }
 
-      final data = sharesSnapshot.docs.first.data() as Map<String, dynamic>;
+      final data = sharesSnapshot.docs.first.data();
       return data['permission'] as String?;
     } catch (e) {
       print('Error checking permission: $e');

@@ -43,21 +43,17 @@ class MockDocumentSnapshot extends Mock {
 
   MockDocumentSnapshot(this._data);
 
-  @override
   bool get exists => true;
 
-  @override
   Map<String, dynamic>? data() => _data;
 }
 
 void main() {
   group('AuthService Unit Tests', () {
-    late MockFirebaseAuth mockFirebaseAuth;
     late MockUser mockUser;
     late MockUserCredential mockUserCredential;
 
     setUp(() {
-      mockFirebaseAuth = MockFirebaseAuth();
       mockUser = MockUser();
       mockUserCredential = MockUserCredential(mockUser);
     });

@@ -286,7 +286,7 @@ class EnhancedAuthBloc extends Bloc<AuthEvent, AuthState> {
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      emit(const AuthState.profileUpdateSuccess('Profile berhasil diperbarui'));
+      emit(ProfileUpdateSuccess(message: 'Profile berhasil diperbarui'));
     } on FirebaseAuthException catch (e) {
       final exception = AuthExceptionHandler.handleFirebaseException(e);
       emit(
@@ -324,7 +324,7 @@ class EnhancedAuthBloc extends Bloc<AuthEvent, AuthState> {
       // Send reset email
       await _auth.sendPasswordResetEmail(email: event.email.trim());
 
-      emit(AuthState.resetPasswordEmailSent(event.email));
+      emit(ResetPasswordEmailSent(email: event.email));
     } on FirebaseAuthException catch (e) {
       final exception = AuthExceptionHandler.handleFirebaseException(e);
       emit(

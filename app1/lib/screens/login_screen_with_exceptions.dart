@@ -73,30 +73,6 @@ class _LoginScreenWithExceptionHandlingState
 
   // ==================== ERROR DIALOG ====================
 
-  void _showErrorDialog(String message, String? errorCode) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Login Gagal'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-          if (errorCode == 'user-not-found')
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                // Navigate to register screen
-              },
-              child: const Text('Daftar'),
-            ),
-        ],
-      ),
-    );
-  }
-
   // ==================== ERROR SNACKBAR ====================
 
   void _showErrorSnackBar(String message) {

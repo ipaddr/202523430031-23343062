@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/note_model.dart';
 import '../services/notes_stream_service.dart';
 import '../services/firestore_notes_service.dart';
-import '../services/auth_service.dart';
 import '../config/routes.dart';
 import 'edit_note_screen.dart';
 
@@ -34,21 +33,6 @@ class _NotesDisplayScreenState extends State<NotesDisplayScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays == 0) {
-      return 'Hari ini';
-    } else if (difference.inDays == 1) {
-      return 'Kemarin';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} hari lalu';
-    } else {
-      return '${date.day}/${date.month}/${date.year}';
-    }
   }
 
   @override
@@ -218,7 +202,6 @@ class _NoteCard extends StatefulWidget {
 class _NoteCardState extends State<_NoteCard> {
   bool _isDeleting = false;
   final _firestoreService = FirestoreNotesService();
-  final _authService = AuthService();
 
   Future<void> _showEditDialog() async {
     Navigator.push(

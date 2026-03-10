@@ -5,7 +5,7 @@ import '../screens/registration_screen.dart';
 import '../screens/email_verification_screen.dart';
 import '../screens/identity_confirmation_screen.dart';
 import '../screens/home_screen.dart';
-import '../screens/notes_screen.dart';
+
 import '../screens/notes_display_screen.dart';
 import '../screens/create_note_screen.dart';
 import '../screens/edit_note_screen.dart';
@@ -115,7 +115,7 @@ class AppRouter {
       // Edit Note Screen
       case AppRoutes.editNote:
         final noteModel = args as dynamic;
-        if (noteModel != null && noteModel is dynamic) {
+        if (noteModel != null) {
           return MaterialPageRoute(
             builder: (_) => EditNoteScreen(note: noteModel),
           );
