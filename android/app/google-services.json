@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "569084450527",
+    "project_id": "betomic-aa7d7",
+    "storage_bucket": "betomic-aa7d7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:569084450527:android:67d36e86bc716a4f43bb6a",
+        "android_client_info": {
+          "package_name": "com.example.betomic"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBodpVFToocYEh4wrBO57YhCr5SHeA8Hfg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
