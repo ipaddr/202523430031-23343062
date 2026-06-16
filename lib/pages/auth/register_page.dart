@@ -1,4 +1,5 @@
 import 'package:betomic/service/auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -34,11 +35,26 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void register() async {
     try {
-      await authService.value.createAccount(
+      final credential = await authService.value.createAccount(
         email: emailController.text,
         password: passwordController.text,
       );
       await authService.value.updateUsername(username: nameController.text);
+
+      // Simpan profil user ke Firestore agar bisa dicari via email
+      // oleh fitur tambah anggota kelompok
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(credential.user!.uid)
+          .set({
+            'uid': credential.user!.uid,
+            'nama': nameController.text.trim(),
+            'email': emailController.text.trim().toLowerCase(),
+            'displayName': nameController.text.trim(),
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+
+      if (!mounted) return;
       Navigator.pushNamed(context, '/login');
     } on FirebaseAuthException catch (e) {
        if (!namaError && !emailError && !passwordError) {

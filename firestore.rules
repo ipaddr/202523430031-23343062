@@ -1,0 +1,32 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Data personal user — hanya pemilik yang bisa akses
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Profil user (root doc) — semua user login bisa baca
+    // supaya fitur pencarian anggota via email bisa bekerja
+    match /users/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Kelompok kolaboratif — semua user login bisa akses
+    match /groups/{groupId} {
+      allow read, write: if request.auth != null;
+
+      match /tasks/{taskId} {
+        allow read, write: if request.auth != null;
+      }
+    }
+
+    // Undangan kelompok — semua user login bisa akses
+    match /invitations/{invitationId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

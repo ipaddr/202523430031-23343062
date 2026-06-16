@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:betomic/pages/main/pages/home_page.dart';
 import 'package:betomic/pages/main/pages/habit_page.dart';
 import 'package:betomic/pages/main/pages/todo_page.dart';
-import 'package:betomic/pages/main/pages/group_tasks_page.dart';
+import 'package:betomic/pages/main/pages/groups_page.dart';
 import 'package:betomic/pages/main/pages/profile_page.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -20,7 +20,7 @@ class _MainPageState extends State<MainPage> {
     HomePage(),
     HabbitPage(),
     ToDoPage(),
-    GroupTasksPage(),
+    GroupsPage(),
     ProfilePage(),
   ];
 
@@ -58,7 +58,7 @@ class _MainPageState extends State<MainPage> {
               _buildNavItem(FontAwesomeIcons.solidHouse, 0),
               _buildNavItem(FontAwesomeIcons.rotate, 1),
               _buildNavItem(FontAwesomeIcons.solidCalendar, 2),
-              _buildNavItem(FontAwesomeIcons.tasks, 3),
+              _buildNavItem(FontAwesomeIcons.peopleGroup, 3),
               _buildNavItem(FontAwesomeIcons.solidUser, 4),
             ],
           ),
