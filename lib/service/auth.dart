@@ -1,4 +1,5 @@
 import "package:firebase_auth/firebase_auth.dart";
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 ValueNotifier<Auth> authService = ValueNotifier(Auth());
@@ -53,5 +54,16 @@ class Auth {
     );
     await currentUser!.reauthenticateWithCredential(credential);
     await currentUser!.updatePassword(newPassword);
+  }
+
+  /// Update nama di Firestore (sinkron dengan displayName Auth)
+  Future<void> updateNamaFirestore({
+    required String uid,
+    required String nama,
+  }) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .update({'nama': nama, 'displayName': nama});
   }
 }

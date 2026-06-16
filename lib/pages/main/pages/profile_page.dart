@@ -41,7 +41,14 @@ class _ProfilePageState extends State<ProfilePage> {
   void updateUsername() async {
     try {
       await authService.value.updateUsername(username: _namaController.text);
-    } catch (e) {}
+      // Sinkron ke Firestore agar fitur pencarian anggota tetap akurat
+      await authService.value.updateNamaFirestore(
+        uid: authService.value.currentUser!.uid,
+        nama: _namaController.text.trim(),
+      );
+    } catch (e) {
+      // silent
+    }
   }
 
   void updatePassowrd() async {
